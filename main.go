@@ -13,7 +13,6 @@ import (
 
 func main() {
 	ConfigRuntime()
-	StartWorkers()
 	StartGin()
 }
 
@@ -24,17 +23,11 @@ func ConfigRuntime() {
 	fmt.Printf("Running with %d CPUs\n", nuCPU)
 }
 
-// StartWorkers start starsWorker by goroutine.
-func StartWorkers() {
-	go statsWorker()
-}
-
 // StartGin starts gin web server with setting router.
 func StartGin() {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()
-	router.Use(rateLimit, gin.Recovery())
 
 	router.POST("/signup", postSignup)
 	router.GET("/users/:user_id", getUsersById)
@@ -64,17 +57,6 @@ var users = []user{
 		Nickname: "たろー",
 		Comment:  "僕は元気です",
 	},
-}
-
-func main() {
-	router := gin.Default()
-
-	router.POST("/signup", postSignup)
-	router.GET("/users/:user_id", getUsersById)
-	router.PATCH("/users/:user_id", patchUsersById)
-	router.POST("/close", postClose)
-
-	router.Run("localhost:8080")
 }
 
 // アカウントの新規作成
