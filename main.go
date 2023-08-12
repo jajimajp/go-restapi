@@ -129,7 +129,7 @@ func postSignup(c *gin.Context) {
 	}
 
 	users = append(users, newUser)
-	c.IndentedJSON(http.StatusCreated, gin.H{
+	c.IndentedJSON(http.StatusOK, gin.H{
 		"message": "Account successfully created",
 		"user":    newUser,
 	})
