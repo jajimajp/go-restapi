@@ -16,14 +16,14 @@ func main() {
 	StartGin()
 }
 
-// ConfigRuntime sets the number of operating system threads.
+// スレッド数の設定
 func ConfigRuntime() {
 	nuCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(nuCPU)
 	fmt.Printf("Running with %d CPUs\n", nuCPU)
 }
 
-// StartGin starts gin web server with setting router.
+// Gin webサーバの開始
 func StartGin() {
 	gin.SetMode(gin.ReleaseMode)
 
@@ -63,8 +63,6 @@ var users = []user{
 func postSignup(c *gin.Context) {
 	var newUser user
 	c.Bind(&newUser)
-	// TODO: id, pass 以外の入力を受けないようにする
-
 	// バリデーション: user_id と password の入力が必須
 	if newUser.ID == "" || newUser.Password == "" {
 		var errMsg string
@@ -160,10 +158,19 @@ func getUsersById(c *gin.Context) {
 
 	for _, u := range users {
 		if u.ID == user_id {
-			// TODO: nickname とcommentの空欄処理
+			userMap := map[string]string{
+				"user_id":  user_id,
+				"nickname": user_id,
+			}
+			if u.Nickname != "" {
+				userMap["nickname"] = u.Nickname
+			}
+			if u.Comment != "" {
+				userMap["comment"] = u.Comment
+			}
 			c.JSON(http.StatusOK, gin.H{
 				"message": "User details by user_id",
-				"user":    u,
+				"user":    userMap,
 			})
 			return
 		}
@@ -187,6 +194,14 @@ func patchUsersById(c *gin.Context) {
 	comment, existsComment := jsonMap["comment"]
 	_, existsID := jsonMap["user_id"]
 	_, existsPassword := jsonMap["password"]
+
+	recipe := map[string]string{}
+	if existsNickname {
+		recipe["nickname"] = nickname
+	}
+	if existsComment {
+		recipe["comment"] = comment
+	}
 
 	// 指定user_idのユーザ情報が存在しない場合は失敗
 	userFound := false
@@ -248,10 +263,9 @@ func patchUsersById(c *gin.Context) {
 		if u.ID == user_id {
 			users[i].Nickname = nickname
 			users[i].Comment = comment
-			// TODO: recipeの形式
 			c.JSON(http.StatusOK, gin.H{
 				"message": "User successfully updated",
-				"recipe":  users[i],
+				"recipe":  []map[string]string{recipe},
 			})
 			return
 		}
